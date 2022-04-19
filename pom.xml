@@ -92,7 +92,30 @@
       <artifactId>opencsv</artifactId>
       <version>5.4</version>
     </dependency>
+
+    <!-- See: https://www.baeldung.com/spring-5-webclient -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-webflux</artifactId>
+    </dependency>
+
+    <!-- See: https://dimitr.im/testing-spring-webclient -->
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>mockwebserver</artifactId>
+      <version>4.9.1</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp</artifactId>
+      <version>4.9.1</version>
+      <scope>test</scope>
+    </dependency>
+    
   </dependencies>
+
 
   <!-- (24) <repositories/> -->
   <!-- (25) <pluginRepositories/> -->
