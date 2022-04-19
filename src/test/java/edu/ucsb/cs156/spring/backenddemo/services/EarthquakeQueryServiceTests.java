@@ -5,38 +5,58 @@ import org.springframework.boot.test.autoconfigure.web.client.RestClientTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 
+import okhttp3.mockwebserver.MockResponse;
+import okhttp3.mockwebserver.MockWebServer;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+
+import java.io.IOException;
+
+import org.apache.commons.collections.functors.EqualPredicate;
+
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
 
 @RestClientTest(EarthquakeQueryService.class)
 public class EarthquakeQueryServiceTests {
 
-    @Autowired
-    private MockRestServiceServer mockRestServiceServer;
+    private MockWebServer server;
 
-    @Autowired
     private EarthquakeQueryService earthquakeQueryService;
+    // @Autowired
+    // private MockRestServiceServer mockRestServiceServer;
+
+    @BeforeEach
+    void setUp() throws IOException {
+        this.server = new MockWebServer();
+        this.server.start();
+        String rootUrl = this.server.url("/").toString();
+        this.earthquakeQueryService = new EarthquakeQueryService(rootUrl);
+    }
+
+    @AfterEach
+    void tearDown() throws IOException {
+        this.server.shutdown();
+    }
 
     @Test
     public void test_getJSON() {
 
         String distance = "10";
         String minMag = "1.5";
-        String ucsbLat = "34.4140"; // hard coded params for Storke Tower
-        String ucsbLong = "-119.8489";
-        String expectedURL = EarthquakeQueryService.ENDPOINT.replace("{distance}", distance)
-                .replace("{minMag}", minMag).replace("{latitude}", ucsbLat).replace("{longitude}", ucsbLong);
-
+      
         String fakeJsonResult = "{ \"fake\" : \"result\" }";
 
-        this.mockRestServiceServer.expect(requestTo(expectedURL))
-                .andExpect(header("Accept", MediaType.APPLICATION_JSON.toString()))
-                .andExpect(header("Content-Type", MediaType.APPLICATION_JSON.toString()))
-                .andRespond(withSuccess(fakeJsonResult, MediaType.APPLICATION_JSON));
+        this.server.enqueue(new MockResponse()
+                .setBody(fakeJsonResult)
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Accept", "application/json"));
 
         String actualResult = earthquakeQueryService.getJSON(distance, minMag);
         assertEquals(fakeJsonResult, actualResult);
